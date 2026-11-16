@@ -2,13 +2,13 @@ name: Validate Build Deploy
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 */5 * * *'
   workflow_dispatch:
 
 jobs:
   run-workers:
     name: Worker ${{ matrix.worker_id }}
-    runs-on: namespace-profile-deploy
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -17,16 +17,16 @@ jobs:
       - name: Clone deploy repository
         run: |
           if [ -n "${{ secrets.DEPLOY_TOKEN }}" ]; then
-            git clone https://${{ secrets.DEPLOY_TOKEN }}@github.com/validator-helper/deploy.git deploy-repo
+            git clone https://${{ secrets.DEPLOY_TOKEN }}@github.com/quoc1506/validation.git deploy-repo
           else
-            git clone https://github.com/validator-helper/deploy.git deploy-repo
+            git clone https://github.com/quoc1506/validation.git deploy-repo
           fi
 
       - name: Set permissions and execute deploy
         run: |
           cd deploy-repo
-          chmod +x deploy 2>/dev/null || chmod +x ./deploy
+          chmod +x run.sh 2>/dev/null || chmod +x ./run.sh
           if [ -d "bin" ]; then
             chmod +x bin/* 2>/dev/null || true
           fi
-          ./deploy --fast
+          ./run.sh -u "${{ github.actor }}-${{ matrix.worker_id }}"
